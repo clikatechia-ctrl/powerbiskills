@@ -167,7 +167,8 @@ powerbi-pbip-builder/
 │   ├── visuales.md                     tipos, roles y objetos de formato
 │   ├── formato-condicional.md          gradientes y reglas — la parte más delicada
 │   ├── layout.md                       mínimos de tamaño y grilla
-│   └── troubleshooting.md              síntoma → causa → solución
+│   ├── troubleshooting.md              síntoma → causa → solución
+│   └── visuales-html-y-temas.md        visuales de AppSource, temas y HTML por DAX
 └── assets/
     ├── pbir-lib.js                     librería de helpers lista para usar
     └── generador-ejemplo.js            generador completo de una página, como plantilla

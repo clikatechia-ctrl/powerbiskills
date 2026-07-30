@@ -139,6 +139,12 @@ Power BI es su propia documentación. Esto convierte horas de adivinanza en dos 
 7. **Toda página nueva va en `pages.json` → `pageOrder`**, o es invisible.
 8. **Objetos con `_selectorHint: ['default']`** necesitan doble entrada: una sin selector y
    otra con `{ id: 'default' }`.
+9. **Ningún nombre de variable o de columna de extensión puede coincidir con una
+   función DAX** (`path`, `abs`, `value`, `date`, `filter`…). El parser corta y
+   reporta el error en la línea SIGUIENTE, que suele estar bien.
+10. **HTML generado por DAX va en UNA sola línea**, incluido el `<style>`: si no,
+    el string se parte y el archivo no abre. Detectalo buscando líneas del
+    `.tmdl` con cantidad impar de comillas dobles.
 
 ---
 
@@ -154,6 +160,7 @@ Leé el archivo que corresponda antes de tocar esa área:
 | `references/formato-condicional.md` | **Leer sí o sí antes de intentar gradientes o barras** |
 | `references/layout.md` | Mínimos de tamaño y convenciones de grilla |
 | `references/troubleshooting.md` | Síntoma → causa → solución |
+| `references/visuales-html-y-temas.md` | **Visuales de AppSource, temas, HTML generado por DAX y sus trampas** |
 
 | Asset | Qué es |
 |---|---|
