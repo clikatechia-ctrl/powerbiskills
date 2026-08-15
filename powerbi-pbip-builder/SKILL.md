@@ -93,6 +93,12 @@ visual. Por eso hace falta el paso 4.
 Validar no es ver. Abrí el `.pbip` y mirá cada página. Un visual puede validar perfecto y
 no dibujarse.
 
+> **Y abrir no es que haya arrancado Power BI.** Cuando no puede cargar el proyecto,
+> Desktop abre igual, con un informe nuevo y vacío, sin error ni diálogo. La señal es el
+> título de la ventana: `Sin título - Power BI Desktop` = no abrió.
+> `powerbi-desktop open` puede decir `launched` + `connected` y no haber abierto nada.
+> Ver **`references/verificar-en-desktop.md`**.
+
 Si no podés abrirlo vos, pedí una **exportación a PDF** (`Archivo → Exportar → PDF`) y
 revisá esa salida.
 
@@ -136,7 +142,9 @@ Power BI es su propia documentación. Esto convierte horas de adivinanza en dos 
 5. **Preservá el `$schema`.** Copialo de un archivo existente del mismo tipo. No lo
    inventes ni lo subas de versión.
 6. **`nativeQueryRef` siempre presente** en cada proyección.
-7. **Toda página nueva va en `pages.json` → `pageOrder`**, o es invisible.
+7. **Toda página nueva va en `pages.json` → `pageOrder`**, o es invisible. Y un informe
+   **sin ninguna página** no abre el proyecto entero: una plantilla PBIP vacía no sirve
+   para probar un modelo semántico recién escrito.
 8. **Objetos con `_selectorHint: ['default']`** necesitan doble entrada: una sin selector y
    otra con `{ id: 'default' }`.
 9. **Ningún nombre de variable o de columna de extensión puede coincidir con una
@@ -160,6 +168,7 @@ Leé el archivo que corresponda antes de tocar esa área:
 | `references/formato-condicional.md` | **Leer sí o sí antes de intentar gradientes o barras** |
 | `references/layout.md` | Mínimos de tamaño y convenciones de grilla |
 | `references/troubleshooting.md` | Síntoma → causa → solución |
+| `references/verificar-en-desktop.md` | **Comprobar que el proyecto abre de verdad y consultarlo por DAX.** Leer antes de dar algo por verificado |
 | `references/visuales-html-y-temas.md` | **Visuales de AppSource, temas, HTML generado por DAX y sus trampas** |
 
 | Asset | Qué es |
@@ -173,6 +182,7 @@ Leé el archivo que corresponda antes de tocar esa área:
 
 - [ ] `validate` en 0 errores
 - [ ] Todas las páginas en `pageOrder`, sin páginas de diagnóstico
+- [ ] El proyecto **abre**: el título de la ventana es el del proyecto, no "Sin título"
 - [ ] Cada visual verificado visualmente (abierto o por PDF)
 - [ ] Cero referencias a campos que no existen en el modelo
 - [ ] Sin scrollbars ni textos cortados

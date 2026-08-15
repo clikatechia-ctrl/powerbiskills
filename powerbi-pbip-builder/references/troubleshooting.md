@@ -1,5 +1,25 @@
 # Síntoma → causa → solución
 
+## Power BI arranca pero queda en "Sin título" (no abrió nada)
+
+El proceso existe, la ventana está, no hay error ni diálogo — y el proyecto **no cargó**.
+Es el modo silencioso de fallar de Power BI Desktop y el que más tiempo hace perder.
+
+Confirmalo mirando el título: `(Get-Process PBIDesktop).MainWindowTitle`.
+
+| Causa | Solución |
+|---|---|
+| **El informe no tiene ninguna página** (`pageOrder: []`) | Un PBIP sin páginas no abre, por más sano que esté el modelo. Agregale una página, aunque sea vacía. |
+| JSON del informe con BOM o malformado | Reescribilo sin BOM. `Out-File -Encoding utf8` de PS 5.1 lo agrega. |
+| TMDL que el parser rechaza | Bisecar (ver abajo y `verificar-en-desktop.md`). |
+| Power BI vino de la Store y el CLI no lo encuentra | `PBI_DESKTOP_PATH`, o `Start-Process` sobre el `.pbip`. |
+
+> `powerbi-desktop open` puede responder `"launched"` + `"connected"` con el proyecto sin
+> abrir: reporta que lanzó el proceso, no que cargó el archivo. **No lo tomes como prueba.**
+
+Procedimiento completo, incluido cómo consultar el modelo por DAX para comprobar que las
+tablas cargaron: **`verificar-en-desktop.md`**.
+
 ## El archivo no abre / error con identificador de actividad
 
 | Causa probable | Solución |
@@ -79,6 +99,24 @@ function rmQuiet(p) {
 ```
 
 Y cerrá Power BI Desktop antes de escribir: mantiene handles abiertos sobre los archivos.
+
+## Escribiendo TMDL a mano: seguí la convención de un modelo que funciona
+
+Si vas a generar el `.SemanticModel` por código, copiá la disposición de archivos de un
+proyecto que abre, en vez de deducirla:
+
+| Qué | Dónde va |
+|---|---|
+| Relaciones | `definition/relationships.tmdl`, **archivo propio**. No dentro de `model.tmdl`. |
+| Una tabla | `definition/tables/<Tabla>.tmdl` **Y** su línea `ref table <Tabla>` en `model.tmdl`. Sin la línea, la tabla no existe. |
+| Consultas M compartidas | `definition/expressions.tmdl` |
+| Columnas de tabla calculada | `sourceColumn: [Nombre]` + `type: calculatedTableColumn` |
+
+Todo con **tabulaciones** (no espacios), **UTF-8 sin BOM** y saltos **CRLF**, como los
+escribe Power BI.
+
+No hay validador oficial para TMDL como lo hay para el informe: el único juez es abrirlo.
+Escribí el modelo por partes y abrí entre medio, en vez de escribir todo y depurar después.
 
 ## Los cambios en el TMDL desaparecen
 
