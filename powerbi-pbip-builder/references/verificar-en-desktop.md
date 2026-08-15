@@ -58,41 +58,36 @@ la asociación de archivos de Windows.
 
 ---
 
-## 3 · Un informe SIN páginas no abre el proyecto
+## 3 · Lo que impide abrir es un modelo SIN TABLAS
 
-Esta es la trampa que más tiempo come, porque el síntoma es idéntico al de un TMDL roto:
-Power BI queda en "Sin título".
+Un proyecto cuyo `definition/tables/` está vacío **no abre**, y falla en el modo silencioso
+del punto 1: Power BI queda en "Sin título", sin error ni diálogo. El síntoma es idéntico
+al de un TMDL inválido, y por eso confunde.
 
-Si `Nordika.Report/definition/pages/pages.json` tiene
+Probado en Power BI Desktop 2.156:
 
-```json
-{ "pageOrder": [] }
-```
+| Modelo | Informe | ¿Abre? |
+|---|---|---|
+| Con tablas | sin ninguna página (`pageOrder: []`) | **Sí.** Carga el modelo y avisa que el informe no tiene páginas |
+| `tables/` vacío | con una página | **No.** Queda en "Sin título" |
+| `tables/` vacío | sin páginas | **No** |
 
-y no hay ninguna carpeta de página, **el proyecto entero no abre**, por más impecable que
-esté el modelo semántico.
+**Consecuencias prácticas:**
 
-**Consecuencia práctica:** una plantilla PBIP vacía (andamiaje sin páginas) no sirve para
-comprobar un modelo recién escrito. Si estás construyendo sólo el `.SemanticModel` y todavía
-no hay tablero, verificalo en una **copia aparte** con una página mínima:
+- Una **plantilla PBIP vacía** (andamiaje sin tablas) no abre, y eso es *esperable*: le
+  falta el modelo. No pierdas tiempo buscándole la falla al informe.
+- Para comprobar un modelo recién escrito **no hace falta agregarle páginas al informe**.
+  Escribí las tablas y abrí: si el modelo está sano, abre igual y ya podés consultarlo por
+  DAX (punto 4). El aviso de "sin páginas" es molesto, no bloqueante.
+- Al informe **igual** ponele al menos una página antes de entregarlo.
 
-```json
-// pages/verificacion/page.json
-{
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
-  "name": "verificacion",
-  "displayName": "Verificacion",
-  "displayOption": "FitToPage",
-  "height": 720,
-  "width": 1280
-}
-```
+> Si escribís JSON del informe, hacelo **sin BOM**. `Out-File -Encoding utf8` de
+> PowerShell 5.1 lo agrega. Usá Python, o `[System.IO.File]::WriteAllText` con
+> `UTF8Encoding($false)`.
 
-y esa página en `pageOrder` + `activePageName`. Una página vacía alcanza: para consultar el
-modelo por DAX no hace falta ningún visual.
-
-> Escribí esos JSON **sin BOM**. `Out-File -Encoding utf8` de PowerShell 5.1 lo agrega.
-> Usá Python, o `[System.IO.File]::WriteAllText` con `UTF8Encoding($false)`.
+> **Un PBIP recién abierto no tiene datos.** Las tablas existen pero vienen vacías hasta
+> que se aprieta *Actualizar*. Un `COUNTROWS` en BLANK no significa que el modelo esté mal;
+> significa que todavía no se refrescó.
 
 ---
 

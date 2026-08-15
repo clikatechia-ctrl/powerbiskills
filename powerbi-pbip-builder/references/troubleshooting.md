@@ -9,10 +9,14 @@ Confirmalo mirando el título: `(Get-Process PBIDesktop).MainWindowTitle`.
 
 | Causa | Solución |
 |---|---|
-| **El informe no tiene ninguna página** (`pageOrder: []`) | Un PBIP sin páginas no abre, por más sano que esté el modelo. Agregale una página, aunque sea vacía. |
-| JSON del informe con BOM o malformado | Reescribilo sin BOM. `Out-File -Encoding utf8` de PS 5.1 lo agrega. |
+| **El modelo no tiene ninguna tabla** (`definition/tables/` vacío) | Esperable en una plantilla vacía: le falta el modelo, no el informe. Escribí las tablas. |
 | TMDL que el parser rechaza | Bisecar (ver abajo y `verificar-en-desktop.md`). |
+| JSON del informe con BOM o malformado | Reescribilo sin BOM. `Out-File -Encoding utf8` de PS 5.1 lo agrega. |
 | Power BI vino de la Store y el CLI no lo encuentra | `PBI_DESKTOP_PATH`, o `Start-Process` sobre el `.pbip`. |
+
+**Lo que NO es la causa:** que el informe no tenga páginas. Un proyecto con el modelo sano y
+`pageOrder: []` **abre igual** — Power BI avisa que faltan páginas, pero carga el modelo y se
+puede consultar por DAX.
 
 > `powerbi-desktop open` puede responder `"launched"` + `"connected"` con el proyecto sin
 > abrir: reporta que lanzó el proceso, no que cargó el archivo. **No lo tomes como prueba.**

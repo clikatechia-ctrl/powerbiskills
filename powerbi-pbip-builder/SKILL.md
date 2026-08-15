@@ -97,6 +97,7 @@ no dibujarse.
 > Desktop abre igual, con un informe nuevo y vacío, sin error ni diálogo. La señal es el
 > título de la ventana: `Sin título - Power BI Desktop` = no abrió.
 > `powerbi-desktop open` puede decir `launched` + `connected` y no haber abierto nada.
+> Y un PBIP recién abierto **no tiene datos** hasta que se aprieta *Actualizar*.
 > Ver **`references/verificar-en-desktop.md`**.
 
 Si no podés abrirlo vos, pedí una **exportación a PDF** (`Archivo → Exportar → PDF`) y
@@ -142,9 +143,9 @@ Power BI es su propia documentación. Esto convierte horas de adivinanza en dos 
 5. **Preservá el `$schema`.** Copialo de un archivo existente del mismo tipo. No lo
    inventes ni lo subas de versión.
 6. **`nativeQueryRef` siempre presente** en cada proyección.
-7. **Toda página nueva va en `pages.json` → `pageOrder`**, o es invisible. Y un informe
-   **sin ninguna página** no abre el proyecto entero: una plantilla PBIP vacía no sirve
-   para probar un modelo semántico recién escrito.
+7. **Toda página nueva va en `pages.json` → `pageOrder`**, o es invisible. Un informe sin
+   ninguna página abre igual (Power BI sólo avisa); lo que **no** abre es un modelo con
+   `definition/tables/` vacío.
 8. **Objetos con `_selectorHint: ['default']`** necesitan doble entrada: una sin selector y
    otra con `{ id: 'default' }`.
 9. **Ningún nombre de variable o de columna de extensión puede coincidir con una
