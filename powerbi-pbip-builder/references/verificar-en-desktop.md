@@ -58,28 +58,60 @@ la asociación de archivos de Windows.
 
 ---
 
-## 3 · Lo que impide abrir es un modelo SIN TABLAS
+## 3 · Un comentario `//` en model.tmdl impide abrir el proyecto
 
-Un proyecto cuyo `definition/tables/` está vacío **no abre**, y falla en el modo silencioso
-del punto 1: Power BI queda en "Sin título", sin error ni diálogo. El síntoma es idéntico
-al de un TMDL inválido, y por eso confunde.
+**Esta es la que más caro sale, porque el archivo se ve perfecto.**
 
-Probado en Power BI Desktop 2.156:
+Un solo comentario `//` en `model.tmdl` o en `relationships.tmdl` y Power BI Desktop se
+queda en "Sin título": no abre, no da error, no abre ningún diálogo. Con los comentarios
+sacados, el mismo proyecto abre en 25 segundos.
 
-| Modelo | Informe | ¿Abre? |
-|---|---|---|
-| Con tablas | sin ninguna página (`pageOrder: []`) | **Sí.** Carga el modelo y avisa que el informe no tiene páginas |
-| `tables/` vacío | con una página | **No.** Queda en "Sin título" |
-| `tables/` vacío | sin páginas | **No** |
+```tmdl
+// Cada tabla nueva necesita su línea 'ref table' acá abajo.   ← ESTO ROMPE EL PROYECTO
+annotation __PBI_TimeIntelligenceEnabled = 0
+```
 
-**Consecuencias prácticas:**
+**Las descripciones `///` sí funcionan** — en tablas, columnas, medidas y expresiones — y
+conviene usarlas: son las que después se ven como descripción del campo en Power BI. Lo
+que rompe son los comentarios de nivel de modelo.
 
-- Una **plantilla PBIP vacía** (andamiaje sin tablas) no abre, y eso es *esperable*: le
-  falta el modelo. No pierdas tiempo buscándole la falla al informe.
-- Para comprobar un modelo recién escrito **no hace falta agregarle páginas al informe**.
-  Escribí las tablas y abrí: si el modelo está sano, abre igual y ya podés consultarlo por
-  DAX (punto 4). El aviso de "sin páginas" es molesto, no bloqueante.
-- Al informe **igual** ponele al menos una página antes de entregarlo.
+> Es una trampa especialmente fácil de pisar cuando una plantilla trae comentarios a modo
+> de instrucción para quien la complete. Esa guía bien intencionada es justo lo que impide
+> abrir el archivo.
+
+Probado en Power BI Desktop 2.156, aislando una variable por vez:
+
+| Situación | ¿Abre? |
+|---|---|
+| Modelo completo, con un `//` en `model.tmdl` | **No** — "Sin título", sin error |
+| El mismo, sin comentarios | **Sí**, 25 s |
+| `definition/tables/` vacío | **No** |
+| Modelo sano, informe sin páginas (`pageOrder: []`) | Abre, **pero** ver el punto 3 bis |
+
+## 3 bis · Un informe sin páginas abre, pero deja la interfaz inservible
+
+Con el modelo sano y `pageOrder: []`, Power BI abre y carga el modelo —se puede consultar
+por DAX— pero la ventana muestra *"No se encontró ActivePageName. El informe no tiene
+páginas. Los informes deben tener al menos una página"* y **no deja llegar a la vista de
+Modelo**. Para cualquiera que tenga que mirar el resultado en pantalla, eso es tan
+bloqueante como no abrir.
+
+**Si estás construyendo sólo el modelo, dejale al informe una página en blanco.** Alcanza
+con esto, sin ningún visual:
+
+```json
+// pages/<id>/page.json
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "<id>", "displayName": "Modelo", "displayOption": "FitToPage",
+  "height": 900, "width": 1280
+}
+```
+
+y en `pages.json`, ese id en `pageOrder` **y** en `activePageName`.
+
+> Escribí esos JSON **sin BOM**. `Out-File -Encoding utf8` de PowerShell 5.1 lo agrega.
+> Usá Python, o `[System.IO.File]::WriteAllText` con `UTF8Encoding($false)`.
 
 > Si escribís JSON del informe, hacelo **sin BOM**. `Out-File -Encoding utf8` de
 > PowerShell 5.1 lo agrega. Usá Python, o `[System.IO.File]::WriteAllText` con
@@ -87,7 +119,9 @@ Probado en Power BI Desktop 2.156:
 
 > **Un PBIP recién abierto no tiene datos.** Las tablas existen pero vienen vacías hasta
 > que se aprieta *Actualizar*. Un `COUNTROWS` en BLANK no significa que el modelo esté mal;
-> significa que todavía no se refrescó.
+> significa que todavía no se refrescó. Las tablas **calculadas** (un calendario en DAX) sí
+> traen datos, porque no dependen del origen externo: si el calendario tiene filas y las
+> demás no, es exactamente eso.
 
 ---
 
@@ -134,6 +168,20 @@ DAX Evaluate queries work only on databases which have at least one table.
 
 Significa que **el proyecto no cargó**. La conexión al motor funciona; lo que está vacío es
 el modelo. Volvé al punto 1: casi seguro la ventana dice "Sin título".
+
+**Refrescar sin tocar la pantalla.** No hace falta apretar *Actualizar* a mano: el mismo
+canal acepta comandos TMSL, así que se puede refrescar el modelo y consultarlo en la misma
+sesión sin robarle el foco a nadie.
+
+```powershell
+$cmd.CommandText = '{"refresh":{"type":"full","objects":[{"database":"' + $bd + '"}]}}'
+$cmd.ExecuteNonQuery()
+```
+
+> **Escribí el `.ps1` con BOM UTF-8** (`encoding="utf-8-sig"` desde Python). PowerShell 5.1
+> lee los scripts sin BOM como ANSI, y una consulta DAX que menciona `Dim_Calendario[Año]`
+> llega al motor como `A??o` y falla con *"Column 'A??o' cannot be found"*. Parece un error
+> del modelo y es del archivo.
 
 **Consultas útiles para el control:**
 

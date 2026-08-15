@@ -9,14 +9,21 @@ Confirmalo mirando el título: `(Get-Process PBIDesktop).MainWindowTitle`.
 
 | Causa | Solución |
 |---|---|
-| **El modelo no tiene ninguna tabla** (`definition/tables/` vacío) | Esperable en una plantilla vacía: le falta el modelo, no el informe. Escribí las tablas. |
-| TMDL que el parser rechaza | Bisecar (ver abajo y `verificar-en-desktop.md`). |
+| **Un comentario `//` en `model.tmdl` o `relationships.tmdl`** | Sacálo. Es la causa más frecuente y la más difícil de ver: el archivo se ve perfecto. Las descripciones `///` no molestan. |
+| **El modelo no tiene ninguna tabla** (`definition/tables/` vacío) | Esperable en una plantilla vacía: le falta el modelo, no el informe. |
+| TMDL que el parser rechaza por otra razón | Bisecar (ver abajo y `verificar-en-desktop.md`). |
 | JSON del informe con BOM o malformado | Reescribilo sin BOM. `Out-File -Encoding utf8` de PS 5.1 lo agrega. |
 | Power BI vino de la Store y el CLI no lo encuentra | `PBI_DESKTOP_PATH`, o `Start-Process` sobre el `.pbip`. |
 
-**Lo que NO es la causa:** que el informe no tenga páginas. Un proyecto con el modelo sano y
-`pageOrder: []` **abre igual** — Power BI avisa que faltan páginas, pero carga el modelo y se
-puede consultar por DAX.
+**Ojo con las plantillas que traen comentarios de guía.** Un `// Cada tabla nueva necesita
+su línea 'ref table' acá abajo` puesto para ayudar a quien complete el archivo es
+exactamente lo que impide abrirlo.
+
+## Abre, pero dice "El informe no tiene páginas"
+
+*"No se encontró ActivePageName. El informe no tiene páginas."* El modelo carga —se puede
+consultar por DAX— pero la interfaz no deja llegar a la vista de Modelo. Dejale al informe
+una página en blanco, con su id en `pageOrder` **y** en `activePageName`.
 
 > `powerbi-desktop open` puede responder `"launched"` + `"connected"` con el proyecto sin
 > abrir: reporta que lanzó el proceso, no que cargó el archivo. **No lo tomes como prueba.**

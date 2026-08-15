@@ -143,15 +143,18 @@ Power BI es su propia documentación. Esto convierte horas de adivinanza en dos 
 5. **Preservá el `$schema`.** Copialo de un archivo existente del mismo tipo. No lo
    inventes ni lo subas de versión.
 6. **`nativeQueryRef` siempre presente** en cada proyección.
-7. **Toda página nueva va en `pages.json` → `pageOrder`**, o es invisible. Un informe sin
-   ninguna página abre igual (Power BI sólo avisa); lo que **no** abre es un modelo con
-   `definition/tables/` vacío.
-8. **Objetos con `_selectorHint: ['default']`** necesitan doble entrada: una sin selector y
+7. **Toda página nueva va en `pages.json` → `pageOrder`**, o es invisible. Y dejá siempre
+   **al menos una página**: sin ninguna, Power BI abre pero no deja llegar a la vista de
+   Modelo.
+8. **Nunca pongas comentarios `//` en `model.tmdl` ni en `relationships.tmdl`.** Uno solo
+   y el proyecto no abre: "Sin título", sin error ni diálogo. Las descripciones `///` de
+   tablas, columnas y medidas sí van.
+9. **Objetos con `_selectorHint: ['default']`** necesitan doble entrada: una sin selector y
    otra con `{ id: 'default' }`.
-9. **Ningún nombre de variable o de columna de extensión puede coincidir con una
+10. **Ningún nombre de variable o de columna de extensión puede coincidir con una
    función DAX** (`path`, `abs`, `value`, `date`, `filter`…). El parser corta y
    reporta el error en la línea SIGUIENTE, que suele estar bien.
-10. **HTML generado por DAX va en UNA sola línea**, incluido el `<style>`: si no,
+11. **HTML generado por DAX va en UNA sola línea**, incluido el `<style>`: si no,
     el string se parte y el archivo no abre. Detectalo buscando líneas del
     `.tmdl` con cantidad impar de comillas dobles.
 
